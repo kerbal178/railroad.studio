@@ -304,3 +304,7 @@
   stroke: white;
   fill: black;
 }
+
+.empty-string {
+  opacity: 0.5;
+}
