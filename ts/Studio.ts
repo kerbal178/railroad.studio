@@ -1,4 +1,4 @@
-import {GvasString, GvasText, Rotator, Vector} from './Gvas';
+import {GvasString, GvasText, Rotator, Vector, stringToGvasText, stringFromGvasText} from './Gvas';
 import {industryName, IndustryType, Railroad} from './Railroad';
 import {MapLayers, RailroadMap} from './RailroadMap';
 import {simplifySplines} from './splines';
@@ -619,14 +619,6 @@ export class Studio {
             tr.appendChild(td);
             // Name
             td = document.createElement('td');
-            // const pre = document.createElement('pre');
-            // td.appendChild(pre);
-            // let name: GvasText | GvasString[][] = frame.name;
-            // if (name && 'textFormat' in name) {
-            //     name = name.textFormat.map((tf) => tf.values);
-            // }
-            // pre.innerText = JSON.stringify(name);
-            // td.innerText = String(frame.name && 'textFormat' in frame.name ? frame.name.textFormat.map((tf)=>tf.values) : frame.name);
             td.appendChild(this.editSimpleText(frame.name, {maxLength: 48, rows: 2, cols: 24}, (name) => frame.name = name));
             tr.appendChild(td);
             // Number
@@ -753,40 +745,9 @@ export class Studio {
         return div;
     }
 
-    private stringToGvasText(str: string) : GvasText {
-        if (str==='') return null;
-        const lines=str.split('\n');
-        if (1===lines.length) return [str];
-        return {
-            guid: '56F8D27149CC5E2D12103BBEBFCA9097',
-            pattern: lines.map((line, i)=>'{'+i+'}').join('<br>'),
-            textFormat: lines.map((line, i)=>({formatKey: String(i), contentType: 2, values: [line]})),
-        };
-    }
-
-    private stringFromGvasText(value: GvasText) : string {
-        if (null===value) return '';
-        if (!Array.isArray(value) && typeof value === 'object') {
-            // text_rich:
-            let expandedText=(value.pattern || '').replace(/<br>/gi, '\n');
-            value.textFormat.forEach((tf, i)=>{
-                const key = tf.formatKey || String(i);
-                // turn all the values into a single string, and sort out nulls.
-                const val = (tf.values[0] || '').replace(/<br>/gi, '\n');
-                expandedText=expandedText.replace('{'+key+'}', val);
-            });
-            return expandedText;
-        } else {
-            // text_simple
-            if (1 !== value.length) throw new Error('Expected single entry in simple GvasText');
-            return (value[0] || '').replace(/<br>/gi, '\n');
-        }
-    }
-
-    // MD-WIP
     private editSimpleText(value: GvasText, options: InputTextOptions, saveValue: (value: GvasText) => void) {
         const span = document.createElement('span');
-        const text = this.stringFromGvasText(value);
+        const text = stringFromGvasText(value);
         if (''===text) {
             span.innerText = '[blank]';
             span.classList.add('empty-string');
@@ -808,7 +769,7 @@ export class Studio {
             const initialVal = span.classList.contains('empty-string') ? '' : span.innerText;
             input.value = initialVal;
             const onSave = () => {
-                value = this.stringToGvasText(input.value);
+                value = stringToGvasText(input.value);
                 if (null===value) {
                     span.innerText='[blank]';
                     span.classList.add('empty-string');
