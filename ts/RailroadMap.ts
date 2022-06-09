@@ -5,7 +5,7 @@ import {ArrayXY, Circle, Element, G, Matrix, Path, PathCommand, Svg} from '@svgd
 import {Industry, IndustryType, Frame, Player, Railroad, Spline, SplineType, Switch, SwitchType, Turntable} from './Railroad';
 import {Studio} from './Studio';
 import {radiusFilter, TreeUtil} from './TreeUtil';
-import {Vector} from './Gvas';
+import {Vector, stringFromGvasText} from './Gvas';
 import {bezierCommand, svgPath} from './bezier';
 import {delta2, MergeLimits, normalizeAngle, splineHeading, vectorHeading} from './splines';
 import {calculateGrade, flattenSpline} from './tool-flatten';
@@ -568,8 +568,9 @@ export class RailroadMap {
         const degrees = Math.round(normalizeAngle(180 + frame.rotation.yaw));
         const x = Math.round(frame.location.x);
         const y = Math.round(frame.location.y);
+        const frameLength=frameLimits[frame.type].length;
         const f = this.layers.frames
-            .rect(frameLimits[frame.type].length, 300)
+            .rect(frameLength, 300)
             .center(0, 0)
             .attr('transform', `translate(${x},${y}) rotate(${degrees})`)
             .addClass('frame')
@@ -580,15 +581,16 @@ export class RailroadMap {
         if (frame.state.freightAmount > 0) {
             f.addClass('cargo-loaded');
         }
-        // const simplified = simplifyText(frame.name);
-        // if (simplified && simplified.length > 0) {
-        //     const x = Math.round(frame.location.x);
-        //     const y = Math.round(frame.location.y);
-        //     this.layers.frames
-        //         .text(simplified.join('\n'))
-        //         .attr('transform', `translate(${x},${y}) rotate(180)`)
-        //         .addClass('frame-text');
-        // }
+        const simplified = stringFromGvasText(frame.number);
+        if (simplified && simplified.length > 0) {
+            const dx = Math.round(45-frameLength/2);
+            const dy = 90;
+            const degreesFlip = degrees + ((degrees > 90 || degrees < -90) ? 0 : 180);
+            this.layers.frames
+                .text(simplified)
+                .attr('transform', `translate(${x},${y}) rotate(${degreesFlip}) translate(${dx},${dy})`)
+                .addClass('frame-text');
+        }
         return f;
     }
 
