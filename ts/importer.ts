@@ -477,7 +477,8 @@ function simplifyText(text: GvasText, isNullRich: boolean, warning: WarningHandl
             replacements[tf.formatKey] = tf.values[0] || '';
         });
         retVal.value = text.pattern.replace(/{([^}]+)}/gi, (match: string, key: string): string => {
-            return replacements[key] || match;
+            const repVal=replacements[key];
+            return (repVal === undefined) ? match : repVal;
         });
         retVal.rich = true;
     }
