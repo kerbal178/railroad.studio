@@ -1,5 +1,5 @@
 /* global BlobPart */
-import {CustomData, EngineVersion, Gvas, GvasHeader, GvasMap, GvasString, GvasText, GvasTypes, RichTextFormat, Rotator, Vector} from './Gvas';
+import {CustomData, EngineVersion, Gvas, GvasHeader, GvasMap, GvasString, GvasText, GvasTypes, SimpleText, RichTextFormat, Rotator, Vector} from './Gvas';
 import {Railroad} from './Railroad';
 
 const exportKeys = [
@@ -148,8 +148,8 @@ export function railroadToGvas(railroad: Railroad): Gvas {
             case 'couplerfrontstatearray': boolArrays[propertyName] = railroad.frames.map((f) => f.state.couplerFrontState); break;
             case 'couplerrearstatearray': boolArrays[propertyName] = railroad.frames.map((f) => f.state.couplerRearState); break;
             case 'framelocationarray': vectorArrays[propertyName] = railroad.frames.map((f) => f.location); break;
-            case 'framenamearray': textArrays[propertyName] = railroad.frames.map((f) => f.name); break;
-            case 'framenumberarray': textArrays[propertyName] = railroad.frames.map((f) => f.number); break;
+            case 'framenamearray': textArrays[propertyName] = railroad.frames.map((f) => complicateText(f.name)); break;
+            case 'framenumberarray': textArrays[propertyName] = railroad.frames.map((f) => complicateText(f.number)); break;
             case 'framerotationarray': rotatorArrays[propertyName] = railroad.frames.map((f) => f.rotation); break;
             case 'frametypearray': stringArrays[propertyName] = railroad.frames.map((f) => f.type); break;
             case 'freightamountarray': intArrays[propertyName] = railroad.frames.map((f) => f.state.freightAmount); break;
@@ -243,6 +243,26 @@ export function railroadToGvas(railroad: Railroad): Gvas {
         textArrays: textArrays,
         vectorArrays: vectorArrays,
     };
+}
+
+function complicateText(text: SimpleText): GvasText {
+    if (text.value === '') return null;
+    const lines : (string|null)[] = text.value.split('\n');
+    if (text.rich) {
+        // Game saves single-line text with the second line as null.
+        if (lines.length === 1) lines[1] = null;
+        return {
+            guid: '56F8D27149CC5E2D12103BBEBFCA9097',
+            // pattern: '{0}<br>{1}',
+            // textFormat: [
+            //     {formatKey: '0', contentType: 2, values: [brStr]},
+            //     {formatKey: '1', contentType: 2, values: []},
+            // ],
+            pattern: lines.map((line, i)=>'{'+i+'}').join('<br>'),
+            textFormat: lines.map((line, i)=>({formatKey: String(i), contentType: 2, values: [line]})),
+        };
+    }
+    return [lines.join('<br>')];
 }
 
 function propertyType(propertyName: string): GvasTypes {

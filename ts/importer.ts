@@ -1,4 +1,4 @@
-import {Gvas, GvasMap} from './Gvas';
+import {Gvas, GvasMap, GvasText, SimpleText} from './Gvas';
 import {Frame, Industry, Player, Railroad, Sandhouse, Spline, SplineTrack, Switch, Turntable, Watertower} from './Railroad';
 
 type WarningHandler = (msg:string)=>void;
@@ -81,8 +81,8 @@ export function gvasToRailroad(gvas: Gvas, warning: WarningHandler): Railroad {
         for (let i = 0; i < frameLocation.length; i++) {
             const frame: Frame = {
                 location: frameLocation[i],
-                name: frameName[i],
-                number: frameNumber[i],
+                name: simplifyText(frameName[i], true, warning),
+                number: simplifyText(frameNumber[i], false, warning),
                 rotation: frameRotation[i],
                 type: frameType[i],
                 state: {
@@ -456,22 +456,39 @@ function optionalMap<T>(map: GvasMap<T>, key: string): T | null {
     return map[matchingKeys[0]];
 }
 
-// function simplifyText(text: GvasText): GvasString[] | null {
-//     if (text === null) return null;
-//     if (Array.isArray(text)) return text;
-//     if (text.guid !== '56F8D27149CC5E2D12103BBEBFCA9097') throw new Error(`Unexpected guid ${text.guid}`);
-//     if (text.pattern !== '{0}<br>{1}') throw new Error(`Unexpected format pattern ${text.pattern}`);
-//     if (text.textFormat.length !== 2) throw new Error(`TextFormat entry_count > 1, is not supported, ${text.textFormat.length}`);
-//     const simplified = text.textFormat.map((tf, i) => {
-//         if (tf.contentType !== 2) throw new Error('Unexpected content type');
-//         if (String(i) !== tf.formatKey) throw new Error('Unexpected format key');
-//         if (tf.values.length === 0) return null;
-//         if (tf.values.length !== 1) throw new Error('Unexpected length');
-//         return tf.values[0];
-//     });
-//     if (simplified.length !== 2) throw new Error('Unexpected length');
-//     return simplified;
-// }
+function simplifyText(text: GvasText, isNullRich: boolean, warning: WarningHandler): SimpleText {
+    const retVal: SimpleText = {value: '', rich: isNullRich};
+    if (text === null) return retVal;
+    if (Array.isArray(text)) {
+        if (text.length !== 1) throw new Error('Unexpected GvasText array length');
+        if (null === text[0]) throw new Error('Unexpected null-string in GvasText array');
+        retVal.value = text[0];
+        retVal.rich = false;
+    } else { // expand rich text
+        if (text.guid !== '56F8D27149CC5E2D12103BBEBFCA9097') throw new Error(`Unexpected guid ${text.guid}`);
+        if (null === text.pattern || '' === text.pattern) throw new Error(`Missing or empty pattern in GvasText ${text.pattern}`);
+        if ('{0}<br>{1}' !== text.pattern) warning(`Unexpected pattern in GvasText: "${text.pattern}". Some information may be lost!`);
+        const replacements: GvasMap<string> = {};
+        text.textFormat.forEach((tf) => {
+            if (tf.contentType !== 2) warning(`Unexpected content-type in GvasText: ${tf.contentType}. Some information may be lost!`);
+            if (tf.formatKey === null) throw new Error('Null formatKey');
+            if (tf.formatKey === '') throw new Error('Empty formatKey');
+            if (tf.values.length > 1) throw new Error('Unexpected length');
+            replacements[tf.formatKey] = tf.values[0] || '';
+        });
+        retVal.value = text.pattern.replace(/{([^}]+)}/gi, (match: string, key: string): string => {
+            return replacements[key] || match;
+        });
+        retVal.rich = true;
+    }
+    // expand linebreaks
+    retVal.value = retVal.value.replace(/<br>/gi, '\n');
+    // remove trailing linebreak, since game ignores it.
+    if (retVal.value.endsWith('\n')) {
+        retVal.value = retVal.value.slice(0, -1);
+    }
+    return retVal;
+}
 
 function enforceEqualLengths(arrays: any[][]): void {
     if (!arrays.every((e, _i, a) => e.length === a[0].length)) {

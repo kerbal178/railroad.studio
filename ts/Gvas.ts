@@ -96,6 +96,10 @@ export interface Rotator {
     roll: number;
 }
 
+export interface SimpleText {
+    value: string;
+    rich: boolean;
+}
 export type GvasText = null | RichText | GvasString[];
 
 export interface RichText {
@@ -108,35 +112,5 @@ export interface RichTextFormat {
     formatKey: GvasString;
     contentType: number;
     values: GvasString[];
-}
-
-export function stringToGvasText(str: string) : GvasText {
-    if (str==='') return null;
-    const lines=str.split('\n');
-    if (1===lines.length) return [str];
-    return {
-        guid: '56F8D27149CC5E2D12103BBEBFCA9097',
-        pattern: lines.map((line, i)=>'{'+i+'}').join('<br>'),
-        textFormat: lines.map((line, i)=>({formatKey: String(i), contentType: 2, values: [line]})),
-    };
-}
-
-export function stringFromGvasText(value: GvasText) : string {
-    if (null===value) return '';
-    if (!Array.isArray(value) && typeof value === 'object') {
-        // text_rich:
-        let expandedText=(value.pattern || '').replace(/<br>/gi, '\n');
-        value.textFormat.forEach((tf, i)=>{
-            const key = tf.formatKey || String(i);
-            // turn all the values into a single string, and sort out nulls.
-            const val = (tf.values[0] || '').replace(/<br>/gi, '\n');
-            expandedText=expandedText.replace('{'+key+'}', val);
-        });
-        return expandedText;
-    } else {
-        // text_simple
-        if (1 !== value.length) throw new Error('Expected single entry in simple GvasText');
-        return (value[0] || '').replace(/<br>/gi, '\n');
-    }
 }
 

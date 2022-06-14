@@ -5,7 +5,7 @@ import {ArrayXY, Circle, Element, G, Matrix, Path, PathCommand, Svg} from '@svgd
 import {Industry, IndustryType, Frame, Player, Railroad, Spline, SplineType, Switch, SwitchType, Turntable} from './Railroad';
 import {Studio} from './Studio';
 import {radiusFilter, TreeUtil} from './TreeUtil';
-import {Vector, stringFromGvasText} from './Gvas';
+import {Vector} from './Gvas';
 import {bezierCommand, svgPath} from './bezier';
 import {delta2, MergeLimits, normalizeAngle, splineHeading, vectorHeading} from './splines';
 import {calculateGrade, flattenSpline} from './tool-flatten';
@@ -581,7 +581,7 @@ export class RailroadMap {
         if (frame.state.freightAmount > 0) {
             f.addClass('cargo-loaded');
         }
-        const simplified = stringFromGvasText(frame.number);
+        const simplified = frame.number.value;
         if (simplified && simplified.length > 0) {
             const dx = Math.round(45-frameLength/2);
             const dy = 90;

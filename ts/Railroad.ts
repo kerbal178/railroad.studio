@@ -1,4 +1,4 @@
-import {GvasHeader, GvasMap, GvasString, GvasText, GvasTypes, Rotator, Vector} from './Gvas';
+import {GvasHeader, GvasMap, GvasString, SimpleText, GvasTypes, Rotator, Vector} from './Gvas';
 
 /**
  * A simplified save state that can be modified in Railroad Studio.
@@ -29,8 +29,8 @@ export interface Railroad {
 
 export interface Frame {
     location: Vector;
-    name: GvasText;
-    number: GvasText;
+    name: SimpleText;
+    number: SimpleText;
     rotation: Rotator;
     type: GvasString;
     state: {

@@ -1,4 +1,4 @@
-import {GvasString, GvasText, Rotator, Vector, stringToGvasText, stringFromGvasText} from './Gvas';
+import {GvasString, SimpleText, Rotator, Vector} from './Gvas';
 import {industryName, IndustryType, Railroad} from './Railroad';
 import {MapLayers, RailroadMap} from './RailroadMap';
 import {simplifySplines} from './splines';
@@ -745,14 +745,13 @@ export class Studio {
         return div;
     }
 
-    private editSimpleText(value: GvasText, options: InputTextOptions, saveValue: (value: GvasText) => void) {
+    private editSimpleText(text: SimpleText, options: InputTextOptions, saveValue: (value: SimpleText) => void) {
         const span = document.createElement('span');
-        const text = stringFromGvasText(value);
-        if (''===text) {
+        if (''===text.value) {
             span.innerText = '[blank]';
             span.classList.add('empty-string');
         } else {
-            span.innerText = text;
+            span.innerText = text.value;
         }
         span.addEventListener('click', () => {
             let input : TextInputElement;
@@ -769,15 +768,15 @@ export class Studio {
             const initialVal = span.classList.contains('empty-string') ? '' : span.innerText;
             input.value = initialVal;
             const onSave = () => {
-                value = stringToGvasText(input.value);
-                if (null===value) {
+                text.value = input.value;
+                if (''===text.value) {
                     span.innerText='[blank]';
                     span.classList.add('empty-string');
                 } else {
                     span.innerText = input.value;
                     span.classList.remove('empty-string');
                 }
-                saveValue(value);
+                saveValue(text);
                 this.modified = true;
                 div.parentElement?.replaceChildren(span);
             };
