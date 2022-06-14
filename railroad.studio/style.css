@@ -312,5 +312,28 @@
 .empty-string {
   opacity: 0.5;
 }
+.warnings {
+  background-color: rgba(255, 255, 255, 0.95);
+  position: absolute;
+  top: .5em;
+  left: .5em;
+  right: .5em;
+  padding: 1em;
+  color: rgb(64,64,64);
+  z-index: 2000;
+  border: solid .3em;
+  border-radius: .5em;
+  border-color: darkorange;
+}
+.dark .warnings {
+  color: darkorange;
+  background-color: rgba(64,64,64,0.95);
+}
+.warnings li {
+  padding-left: .5em;
+}
+.warnings li::marker {
+  content: "⚠️";
+}
 
 

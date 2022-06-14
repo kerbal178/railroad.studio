@@ -136,7 +136,7 @@ function handleArrayBuffer(buffer: ArrayBuffer, filename: string) {
             const gvas = parseGvas(buffer);
             titleText.textContent = 'Importing ' + filename;
             window.setTimeout(rejectOnCatch(reject, () => {
-                const railroad = gvasToRailroad(gvas);
+                const railroad = gvasToRailroad(gvas, handleWarning);
                 titleText.textContent = 'Initializing ' + filename;
                 window.setTimeout(rejectOnCatch(reject, () => {
                     window.studio = new Studio(filename, railroad, header, content);
@@ -161,4 +161,26 @@ export function handleError(error: Error) {
     document.getElementById('content')!.replaceChildren(title, pre);
     document.getElementById('header')!.replaceChildren();
     throw error; // also print the stack trace with TypeScript mapped source links in the console
+}
+
+export function handleWarning(warning: string) {
+    if (!document.getElementById('warnings')) {
+        const subtitle = document.createElement('div');
+        subtitle.id = 'warnings';
+        subtitle.classList.add('warnings');
+        const warnList = document.createElement('ul');
+        warnList.id = 'warning-list';
+        subtitle.appendChild(warnList);
+        const dismissButton = document.createElement('button');
+        dismissButton.classList.add('btn', 'btn-danger');
+        dismissButton.innerText = 'I\'ve made backups.';
+        subtitle.replaceChildren(warnList, dismissButton);
+        document.body.appendChild(subtitle);
+        dismissButton.addEventListener('click', () => {
+            document.getElementById('warnings')?.remove();
+        });
+    }
+    const li = document.createElement('li');
+    li.innerText = warning;
+    document.getElementById('warning-list')!.appendChild(li);
 }

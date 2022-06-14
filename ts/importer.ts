@@ -1,12 +1,15 @@
 import {Gvas, GvasMap} from './Gvas';
 import {Frame, Industry, Player, Railroad, Sandhouse, Spline, SplineTrack, Switch, Turntable, Watertower} from './Railroad';
 
+type WarningHandler = (msg:string)=>void;
+
 /**
  * Convert a raw Gvas object into a Railroad
  * @param {Gvas} gvas
+ * @param {WarningHandler} warning
  * @return {Railroad}
  */
-export function gvasToRailroad(gvas: Gvas): Railroad {
+export function gvasToRailroad(gvas: Gvas, warning: WarningHandler): Railroad {
     if (gvas._header.saveType !== '/Script/arr.arrSaveGame') throw new Error(`Unsupported saveType: ${gvas._header.saveType}`);
     // Read save game data
     const saveGameVersion = optionalMap(gvas.strings, 'SaveGameVersion');
