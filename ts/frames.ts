@@ -3,41 +3,41 @@ interface FrameType {
     firewood?: number,
     headlights?: number,
     length: number,
-    name_length: number,
-    name_lines: number,
-    number_length: number,
-    number_lines: number,
     sandLevelMax?: number,
     smokestacks?: number,
     waterBoilerMax?: number,
     waterTankMax?: number,
+    nameLimits?: TextLimit[],
+    numberLimits?: TextLimit[] | null, // null=no number displayed
 }
+
+export interface TextLimit {
+    name: string;
+    rows: number;
+    cols: number;
+}
+
+const ingameNumberLimit: TextLimit = {name: 'In-Game limit', rows: 1, cols: 4};
 
 const frameTypeBoxcar: FrameType = {
     length: 822.82,
-    name_length: 13,
-    name_lines: 4,
-    number_length: 7,
-    number_lines: 4,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 15}, {name: 'Reasonable', rows: 4, cols: 12}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeCaboose: FrameType = {
     firewood: 15,
     length: 679.00,
-    name_length: 20,
-    name_lines: 1,
-    number_length: 12,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 21}, {name: 'Reasonable', rows: 1, cols: 25}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeClass70: FrameType = {
     firewood: 1350,
     headlights: 2,
     length: 938.90,
-    name_length: 14,
-    name_lines: 1,
-    number_length: 3,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 3}],
     sandLevelMax: 100,
     smokestacks: 3,
     waterBoilerMax: 6000,
@@ -45,10 +45,8 @@ const frameTypeClass70: FrameType = {
 
 const frameTypeClass70Tender: FrameType = {
     length: 678.81,
-    name_length: 22,
-    name_lines: 3,
-    number_length: 0,
-    number_lines: 0,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 22}, {name: 'Reasonable', rows: 2, cols: 22}],
+    numberLimits: null, // no number displayed
     waterTankMax: 9500,
 };
 
@@ -56,10 +54,8 @@ const frameTypeClimax: FrameType = {
     firewood: 332,
     headlights: 1,
     length: 849.89,
-    name_length: 11,
-    name_lines: 7,
-    number_length: 2,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 11}, {name: 'Reasonable', rows: 6, cols: 11}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 3,
     waterBoilerMax: 4000,
@@ -69,10 +65,8 @@ const frameTypeClimax: FrameType = {
 const frameTypeCooke260: FrameType = {
     headlights: 2,
     length: 837.83,
-    name_length: 12,
-    name_lines: 1,
-    number_length: 3,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 16}, {name: 'Reasonable', rows: 1, cols: 12}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 3,
     waterBoilerMax: 5000,
@@ -82,20 +76,16 @@ const frameTypeCooke260Tender: FrameType = {
     firewood: 1460,
     headlights: 2,
     length: 641.73,
-    name_length: 11,
-    name_lines: 1,
-    number_length: 6,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 22}, {name: 'Reasonable', rows: 1, cols: 20}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 8}],
     waterTankMax: 9500,
 };
 
 const frameTypeEureka: FrameType = {
     headlights: 3,
     length: 802.13,
-    name_length: 8,
-    name_lines: 1,
-    number_length: 2,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 1,
     waterBoilerMax: 5000,
@@ -104,69 +94,53 @@ const frameTypeEureka: FrameType = {
 const frameTypeEurekaTender: FrameType = {
     firewood: 499,
     length: 497.08,
-    name_length: 18,
-    name_lines: 1,
-    number_length: 0,
-    number_lines: 0,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 22}],
+    numberLimits: null, // no number displayed
     waterTankMax: 3800,
 };
 
 const frameTypeFlatcarCordwood: FrameType = {
     length: 785.60,
-    name_length: 8,
-    name_lines: 1,
-    number_length: 8,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeFlatcarHopper: FrameType = {
     length: 785.60,
-    name_length: 7,
-    name_lines: 1,
-    number_length: 4,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 8}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeFlatcarLogs: FrameType = {
     length: 785.60,
-    name_length: 7,
-    name_lines: 1,
-    number_length: 12,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeFlatcarStakes: FrameType = {
     length: 785.60,
-    name_length: 8,
-    name_lines: 1,
-    number_length: 8,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeFlatcarTanker: FrameType = {
     length: 785.60,
-    name_length: 19,
-    name_lines: 1,
-    number_length: 12,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 12}, {name: 'Reasonable', rows: 1, cols: 20}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
-const frameTypeHandcard: FrameType = {
+const frameTypeHandcar: FrameType = {
     length: 220.20,
-    name_length: 18,
-    name_lines: 1,
-    number_length: 5,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}, {name: 'Reasonable', rows: 1, cols: 15}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 6}],
 };
 
 const frameTypeHeisler: FrameType = {
     firewood: 454,
     headlights: 1,
     length: 913.73,
-    name_length: 11,
-    name_lines: 6,
-    number_length: 2,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 11}, {name: 'Reasonable', rows: 3, cols: 12}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 2,
     waterBoilerMax: 5000,
@@ -177,10 +151,8 @@ const frameTypePorter040: FrameType = {
     firewood: 66,
     headlights: 2,
     length: 391.20,
-    name_length: 12,
-    name_lines: 1,
-    number_length: 2,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 1,
     waterBoilerMax: 500,
@@ -191,10 +163,8 @@ const frameTypePorter042: FrameType = {
     firewood: 164,
     headlights: 2,
     length: 461.35,
-    name_length: 12,
-    name_lines: 1,
-    number_length: 2,
-    number_lines: 1,
+    nameLimits: [{name: 'In-Game limit', rows: 1, cols: 10}],
+    numberLimits: [ingameNumberLimit, {name: 'Reasonable', rows: 1, cols: 2}],
     sandLevelMax: 100,
     smokestacks: 1,
     waterBoilerMax: 500,
@@ -216,7 +186,7 @@ export const frameLimits: { [key: string]: FrameType } = {
     flatcar_logs: frameTypeFlatcarLogs,
     flatcar_stakes: frameTypeFlatcarStakes,
     flatcar_tanker: frameTypeFlatcarTanker,
-    handcar: frameTypeHandcard,
+    handcar: frameTypeHandcar,
     heisler: frameTypeHeisler,
     porter_040: frameTypePorter040,
     porter_042: frameTypePorter042,

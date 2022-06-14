@@ -309,9 +309,6 @@
   fill: black;
 }
 
-.empty-string {
-  opacity: 0.5;
-}
 .warnings {
   background-color: rgba(255, 255, 255, 0.95);
   position: absolute;
@@ -336,4 +333,36 @@
   content: "⚠️";
 }
 
+.table-striped > tbody > tr > td.n-a {
+  color:grey;
+}
 
+.empty-field {
+  color:grey;
+}
+
+.validation {
+  font-size: 75%;
+  padding-right: 1em;
+  width: 100%;
+  color:grey;
+  margin:0;
+}
+.validation li {
+  padding-left: .5em;
+}
+.validation .warn {
+  color:darkorange;
+}
+.validation .fail {
+  color:darkred;
+}
+.pass::marker {
+  content: "✔️";
+}
+.warn::marker {
+  content: "⚠️";
+}
+.fail::marker {
+  content: "🚫";
+};

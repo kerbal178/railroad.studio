@@ -3,6 +3,7 @@ import {industryName, IndustryType, Railroad} from './Railroad';
 import {MapLayers, RailroadMap} from './RailroadMap';
 import {simplifySplines} from './splines';
 import {gvasToBlob, railroadToGvas} from './exporter';
+import {TextLimit, frameLimits} from './frames';
 
 interface InputTextOptions {
     max?: string;
@@ -10,8 +11,8 @@ interface InputTextOptions {
     maxLength?: number;
     rows?: number;
     cols?: number;
+    textLimits?: TextLimit[];
 }
-type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
 
 type Triplet<T> = [T, T, T];
 
@@ -597,33 +598,40 @@ export class Studio {
         table.appendChild(thead);
         let tr = document.createElement('tr');
         thead.appendChild(tr);
-        for (const columnHeader of ['Index', 'Type', 'Name', 'Number']) {
+        for (const columnHeader of ['Type', 'Name', 'Number']) {
             const th = document.createElement('th');
             th.innerText = columnHeader;
             tr.appendChild(th);
         }
         const tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        let index=0;
         for (const frame of this.railroad.frames) {
             tr = document.createElement('tr');
             tbody.appendChild(tr);
-            // Index
-            let td = document.createElement('td');
-            td.innerText = index.toString();
-            tr.appendChild(td);
-            index++;
             // Type
-            td = document.createElement('td');
+            let td = document.createElement('td');
             td.innerText = String(frame.type);
             tr.appendChild(td);
+            const limits = frameLimits[String(frame.type)];
             // Name
             td = document.createElement('td');
-            td.appendChild(this.editSimpleText(frame.name, {maxLength: 48, rows: 2, cols: 24}, (name) => frame.name = name));
+            if (limits.nameLimits) {
+                const textOptions = {maxLength: 250, rows: 2, cols: 30, textLimits: limits.nameLimits};
+                td.appendChild(this.editSimpleText(frame.name, textOptions, (name) => frame.name = name));
+            } else {
+                td.innerHTML = 'n/a';
+                td.classList.add('n-a');
+            }
             tr.appendChild(td);
             // Number
             td = document.createElement('td');
-            td.appendChild(this.editSimpleText(frame.number, {maxLength: 5, rows: 1, cols: 6}, (frameNo) => frame.number = frameNo));
+            if (limits.numberLimits) {
+                const textOptions = {maxLength: 8, rows: 1, cols: 8, textLimits: limits.numberLimits};
+                td.appendChild(this.editSimpleText(frame.number, textOptions, (frameNo) => frame.number = frameNo));
+            } else {
+                td.innerHTML = 'n/a';
+                td.classList.add('n-a');
+            }
             tr.appendChild(td);
         }
     }
@@ -749,32 +757,47 @@ export class Studio {
         const span = document.createElement('span');
         if (''===text.value) {
             span.innerText = '[blank]';
-            span.classList.add('empty-string');
+            span.classList.add('empty-field');
         } else {
             span.innerText = text.value;
         }
         span.addEventListener('click', () => {
-            let input : TextInputElement;
-            if (options.rows && (1 < options.rows)) {
-                input = document.createElement('textarea');
-                input.rows = options.rows;
-                input.cols = options.cols || 12;
-            } else {
-                input = document.createElement('input');
-                input.type = 'text';
-                input.size = options.cols || 12;
-            }
-            if (options.maxLength) input.maxLength = options.maxLength;
-            const initialVal = span.classList.contains('empty-string') ? '' : span.innerText;
+            const input = document.createElement('textarea');
+            input.rows = span.innerText.split('\n').length;
+            input.cols = options.cols || 10;
+            input.maxLength = options.maxLength || 20;
+            const initialVal = span.classList.contains('empty-field') ? '' : span.innerText;
             input.value = initialVal;
+            input.classList.add('form-control');
+            // Text validation
+            const validationGroup = document.createElement('ul');
+            validationGroup.classList.add('validation');
+            const validatorList : (() => void)[] = (options.textLimits || []).map((limits)=>{
+                const check = document.createElement('li');
+                validationGroup.appendChild(check);
+                return () => {
+                    const rows = input.value.split('\n');
+                    const numRows = rows.length;
+                    const maxRowLen = rows.reduce((prev, curr)=>(Math.max(prev, curr.length)), 0);
+                    check.innerText = `${limits.name}: ${numRows}/${limits.rows} rows, ${maxRowLen}/${limits.cols} columns\n`;
+                    const valid = numRows <= limits.rows && maxRowLen <= limits.cols;
+                    check.classList.toggle('pass', valid);
+                    check.classList.toggle('warn', !valid);
+                };
+            });
+            function updateValidation() {
+                validatorList.forEach((v)=>v());
+            }
+            updateValidation();
+            input.addEventListener('input', updateValidation);
             const onSave = () => {
                 text.value = input.value;
                 if (''===text.value) {
                     span.innerText='[blank]';
-                    span.classList.add('empty-string');
+                    span.classList.add('empty-field');
                 } else {
                     span.innerText = input.value;
-                    span.classList.remove('empty-string');
+                    span.classList.remove('empty-field');
                 }
                 saveValue(text);
                 this.modified = true;
@@ -784,13 +807,17 @@ export class Studio {
                 if (input.value !== initialVal) {
                     // Restore the original value
                     input.value = initialVal;
+                    updateValidation();
                 } else {
                     // Close the edit control
                     div.parentElement?.replaceChildren(span);
                 }
             };
             // Layout
-            const div = this.saveContext(input, onSave, onCancel);
+            const div = document.createElement('div');
+            div.classList.add('vstack');
+            const hstack = this.saveContext(validationGroup, onSave, onCancel);
+            div.replaceChildren(input, hstack);
             span.parentElement?.replaceChildren(div);
         });
         return span;
@@ -806,6 +833,7 @@ export class Studio {
             if (options.min) input.min = options.min;
             input.pattern = '[0-9]+';
             input.value = String(value);
+            input.classList.add('form-control');
             const saveAction = () => {
                 value = Number(input.value);
                 span.innerText = Number.isInteger(value) ? String(value) : value.toFixed(2);
@@ -881,6 +909,7 @@ export class Studio {
                 input.type = 'text';
                 input.step = 'any';
                 input.value = String(value[i]);
+                input.classList.add('form-control');
             });
             const onSave = () => {
                 value = [
@@ -961,6 +990,7 @@ export class Studio {
                 select.appendChild(option);
             }
             select.value = String(type);
+            select.classList.add('form-control');
             // Save
             const btnSave = document.createElement('button');
             btnSave.classList.add('btn', 'btn-success');
