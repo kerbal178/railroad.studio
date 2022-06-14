@@ -213,6 +213,7 @@
 
 .frame-caboose {
   fill: black;
+  color: lightgrey;
 }
 
 .frame-boxcar {
@@ -236,7 +237,7 @@
 }
 
 .frame-flatcar_hopper.cargo-loaded {
-  fill: black;
+  fill: #555;
 }
 
 .frame-flatcar_logs {
